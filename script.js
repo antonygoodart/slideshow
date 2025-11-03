@@ -1,118 +1,198 @@
-const container = document.getElementById('slidesContainer');
-const slides = container.querySelectorAll('img');
+/* Sticky slide tape — rewritten modularly
+   - snaps to slides (no stopping mid-frame)
+   - pointer drag works on desktop + mobile
+   - double-tap/double-click enters device fullscreen
+   - single tap while fullscreen exits
+   - left/right arrow buttons retained
+*/
 
-let current = 0;
-let startX = 0;
-let currentTranslate = 0;
-let prevTranslate = 0;
-let dragging = false;
-let animationID;
-let velocity = 0;
-let lastTouchX = 0;
-let lastTouchTime = 0;
-let lastTap = 0;
-let isFullscreen = false;
+(() => {
+  const slidesEl = document.getElementById('slides');
+  const viewport = document.getElementById('viewport');
+  const prevBtn = document.getElementById('btnPrev');
+  const nextBtn = document.getElementById('btnNext');
+  const images = Array.from(slidesEl.querySelectorAll('img'));
+  let index = 0;
 
-function setPositionByIndex() {
-  container.style.transition = "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-  container.style.transform = `translateX(${-current * window.innerWidth}px)`;
-}
+  // drag state
+  let startX = 0;
+  let currentTranslate = 0;   // px
+  let baseTranslate = 0;      // px, = -index * width
+  let isDragging = false;
+  let width = window.innerWidth;
 
-function touchStart(index) {
-  return function (event) {
-    container.style.transition = "none";
-    startX = getPositionX(event);
-    lastTouchX = startX;
-    lastTouchTime = Date.now();
-    dragging = true;
-    animationID = requestAnimationFrame(animation);
+  // tap detection
+  let lastTap = 0;
+  let isFullscreen = false;
+
+  // helpers
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const setTranslate = (tx, animate = true) => {
+    if (animate) slidesEl.style.transition = 'transform 260ms cubic-bezier(0.25,0.46,0.45,0.94)';
+    else slidesEl.style.transition = 'none';
+    slidesEl.style.transform = `translateX(${tx}px)`;
+    currentTranslate = tx;
   };
-}
 
-function touchEnd() {
-  cancelAnimationFrame(animationID);
-  dragging = false;
+  const updateButtons = () => {
+    prevBtn.disabled = index <= 0;
+    nextBtn.disabled = index >= images.length - 1;
+  };
 
-  const movedBy = currentTranslate - prevTranslate;
+  const snapToIndex = (dirHint = 0) => {
+    // decide final index based on currentTranslate/baseTranslate and a threshold
+    const moved = currentTranslate - baseTranslate; // negative means moved left -> towards next
+    const threshold = width * 0.18; // ~18% drag threshold
+    if (moved <= -threshold && index < images.length - 1) index += 1;
+    else if (moved >= threshold && index > 0) index -= 1;
+    else if (dirHint !== 0) {
+      // fallback: if a button requested movement, obey it
+      index = clamp(index + dirHint, 0, images.length - 1);
+    }
+    baseTranslate = -index * width;
+    setTranslate(baseTranslate, true);
+    updateButtons();
+  };
 
-  // momentum-based continuation
-  const distance = Math.abs(movedBy);
-  const direction = movedBy < 0 ? 1 : -1;
-  const momentumDistance = Math.min(Math.max(distance * 0.5, 0), window.innerWidth);
-  const momentumThreshold = window.innerWidth / 4;
+  // pointer handlers (works for touch & mouse via pointer events)
+  const onPointerDown = (evt) => {
+    // Only left button for mouse
+    if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+    isDragging = true;
+    slidesEl.setPointerCapture(evt.pointerId);
+    slidesEl.style.transition = 'none';
+    startX = evt.clientX;
+    baseTranslate = -index * width;
+    // small immediate set so currentTranslate is baseline
+    currentTranslate = baseTranslate;
+  };
 
-  if ((movedBy < -momentumThreshold || (velocity < -0.3 && current < slides.length - 1))) {
-    current += 1;
-  } else if ((movedBy > momentumThreshold || (velocity > 0.3 && current > 0))) {
-    current -= 1;
-  }
+  const onPointerMove = (evt) => {
+    if (!isDragging) return;
+    const dx = evt.clientX - startX;
+    const tx = baseTranslate + dx;
+    // optional small resistance beyond edges
+    const maxOver = width * 0.2;
+    let txClamped = tx;
+    if (tx > 0) txClamped = tx > maxOver ? maxOver : tx; // left overscroll
+    if (tx < - (images.length - 1) * width) {
+      const min = - (images.length - 1) * width - maxOver;
+      txClamped = tx < min ? min : tx;
+    }
+    setTranslate(txClamped, false);
+  };
 
-  setPositionByIndex();
-}
+  const onPointerUp = (evt) => {
+    if (!isDragging) return;
+    isDragging = false;
+    try { slidesEl.releasePointerCapture(evt.pointerId); } catch (e) {}
+    // Snap to nearest slide (no mid-frame stopping)
+    snapToIndex();
+  };
 
-function touchMove(event) {
-  if (dragging) {
-    const currentPosition = getPositionX(event);
-    const delta = currentPosition - lastTouchX;
-    const deltaTime = Date.now() - lastTouchTime;
+  // click / double-click logic on images
+  const onImageClick = (evt) => {
+    // Ignore clicks that were part of drag (if dragged more than few px recently)
+    if (isDragging) return;
 
-    velocity = deltaTime ? delta / deltaTime : 0;
-    lastTouchX = currentPosition;
-    lastTouchTime = Date.now();
-
-    currentTranslate = prevTranslate + currentPosition - startX;
-  }
-}
-
-function getPositionX(event) {
-  return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
-}
-
-function animation() {
-  container.style.transform = `translateX(${currentTranslate}px)`;
-  if (dragging) requestAnimationFrame(animation);
-  else prevTranslate = -current * window.innerWidth;
-}
-
-// --- Fullscreen controls ---
-slides.forEach(img => {
-  img.addEventListener("click", (e) => {
     const now = Date.now();
     if (now - lastTap < 300) {
-      toggleFullscreen(e.target);
+      // double-tap / double-click => enter fullscreen
+      toggleFullscreen(evt.currentTarget);
+    } else {
+      // single click: if fullscreen, exit
+      if (isFullscreen) exitFullscreen();
     }
     lastTap = now;
-  });
-});
+  };
 
-function toggleFullscreen(target) {
-  if (!isFullscreen) {
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen();
+  const toggleFullscreen = (targetImg) => {
+    if (!isFullscreen) {
+      // request device fullscreen on the slideshow container (so UI chrome is hidden)
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      images.forEach(i => i.classList.add('fullscreen-active'));
+      document.body.classList.add('fullscreen-mode');
+      isFullscreen = true;
+    } else {
+      exitFullscreen();
     }
-    target.classList.add("fullscreen-active");
-    document.body.classList.add("fullscreen-mode");
-    isFullscreen = true;
-  } else {
-    if (document.fullscreenElement) document.exitFullscreen();
-    slides.forEach(i => i.classList.remove("fullscreen-active"));
-    document.body.classList.remove("fullscreen-mode");
+  };
+
+  const exitFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(()=>{});
+    } else if (document.webkitFullscreenElement) {
+      if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+    images.forEach(i => i.classList.remove('fullscreen-active'));
+    document.body.classList.remove('fullscreen-mode');
     isFullscreen = false;
-  }
-}
+  };
 
-// --- Swipe events ---
-slides.forEach((slide, index) => {
-  const touchStartHandler = touchStart(index);
-  slide.addEventListener('touchstart', touchStartHandler);
-  slide.addEventListener('touchend', touchEnd);
-  slide.addEventListener('touchmove', touchMove);
+  // buttons
+  prevBtn.addEventListener('click', () => {
+    if (index > 0) {
+      snapToIndex(-1);
+    }
+  });
+  nextBtn.addEventListener('click', () => {
+    if (index < images.length - 1) {
+      snapToIndex(1);
+    }
+  });
 
-  slide.addEventListener('mousedown', touchStartHandler);
-  slide.addEventListener('mouseup', touchEnd);
-  slide.addEventListener('mouseleave', touchEnd);
-  slide.addEventListener('mousemove', touchMove);
-});
+  // pointer events on the slides element
+  slidesEl.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
 
-window.addEventListener('resize', setPositionByIndex);
-setPositionByIndex();
+  // clicks for enter/exit fullscreen
+  images.forEach(img => {
+    img.addEventListener('click', onImageClick);
+    // prevent native drag on desktop
+    img.addEventListener('dragstart', e => e.preventDefault());
+  });
+
+  // keyboard navigation accessibility (left/right)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+      if (index < images.length - 1) {
+        index++;
+        baseTranslate = -index * width;
+        setTranslate(baseTranslate, true);
+        updateButtons();
+      }
+    } else if (e.key === 'ArrowLeft') {
+      if (index > 0) {
+        index--;
+        baseTranslate = -index * width;
+        setTranslate(baseTranslate, true);
+        updateButtons();
+      }
+    } else if (e.key === 'Escape' && isFullscreen) {
+      exitFullscreen();
+    }
+  });
+
+  // update width & position on resize (responsive)
+  const onResize = () => {
+    width = window.innerWidth;
+    baseTranslate = -index * width;
+    setTranslate(baseTranslate, false);
+  };
+  window.addEventListener('resize', onResize);
+
+  // init
+  const init = () => {
+    width = window.innerWidth;
+    index = 0;
+    baseTranslate = -index * width;
+    setTranslate(baseTranslate, false);
+    updateButtons();
+  };
+
+  init();
+})();
