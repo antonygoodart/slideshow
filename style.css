@@ -1,53 +1,137 @@
-/* Basic layout */
-:root { --arrow-color: rgba(180,180,180,0.45); --arrow-hover: rgba(255,255,255,0.85); }
-html,body { height:100%; margin:0; background:#000; }
-body { display:flex; align-items:center; justify-content:center; font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-
-/* Slideshow container fills available UI window (use your iframe or page viewport) */
-.slideshow { position:relative; width:100vw; height:100vh; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; }
-
-/* Viewport masks the slides strip */
-.viewport { width:100%; height:100%; overflow:hidden; touch-action: none; } /* capture horizontal pointer gestures */
-
-/* The tape: horizontal strip of slides */
-.slides { display:flex; height:100%; will-change: transform; user-select:none; -webkit-user-drag:none; }
-
-/* Each image fills the UI window area while keeping aspect ratio (cropping allowed) */
-.slides img {
-  width:100vw;
-  height:100vh;
-  flex-shrink:0;
-  object-fit:cover; /* fills area, preserves aspect */
-  pointer-events:auto;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 150ms ease; /* small hover/press transform if needed */
-  display:block;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Buttons - minimalist grey, thicker, no border, low opacity */
-button.arrow {
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  background:none;
-  border:0;
-  color:var(--arrow-color);
-  font-size:3.2rem;
-  line-height:1;
-  padding:10px 12px;
-  cursor:pointer;
-  z-index:10;
-  user-select:none;
-  -webkit-user-select:none;
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
 }
-button.arrow:hover { color:var(--arrow-hover); }
-button.arrow.left { left:12px; }
-button.arrow.right { right:12px; }
 
-/* Disabled arrow look */
-button.arrow:disabled { opacity:0.25; cursor:default; color:rgba(180,180,180,0.25); }
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
 
-/* Fullscreen mode classes */
-.fullscreen-active { cursor: zoom-out !important; }
-.fullscreen-mode { position:fixed; inset:0; z-index:9999; background:#000; }
+.slideshow-wrapper {
+    position: relative;
+    width: 90vmin;
+    height: 90vmin;
+    max-width: 800px;
+    max-height: 800px;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.clickable-area {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    top: 25%;
+    left: 25%;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    color: rgba(150, 150, 150, 0.5);
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.arrow:hover {
+    color: rgba(100, 100, 100, 0.8);
+}
+
+.arrow.disabled {
+    opacity: 0.2;
+    cursor: default;
+    pointer-events: none;
+}
+
+.arrow-left {
+    left: 10px;
+}
+
+.arrow-right {
+    right: 10px;
+}
+
+.fullscreen-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.fullscreen-overlay.active {
+    display: flex;
+}
+
+.fullscreen-overlay img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .slideshow-wrapper {
+        width: 95vmin;
+        height: 95vmin;
+    }
+
+    .arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+
+    .clickable-area {
+        display: none;
+    }
+}
