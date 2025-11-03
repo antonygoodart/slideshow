@@ -19,6 +19,12 @@ const nextArrow = document.getElementById('nextArrow');
 const clickableArea = document.getElementById('clickableArea');
 const imageContainer = document.getElementById('imageContainer');
 
+function vibrateDevice() {
+    if ('vibrate' in navigator) {
+        navigator.vibrate(10);
+    }
+}
+
 function updateImage() {
     mainImage.src = images[currentIndex];
     fullscreenImage.src = images[currentIndex];
@@ -43,6 +49,7 @@ function nextSlide() {
     if (currentIndex < images.length - 1) {
         currentIndex++;
         updateImage();
+        vibrateDevice();
     }
 }
 
@@ -50,17 +57,45 @@ function prevSlide() {
     if (currentIndex > 0) {
         currentIndex--;
         updateImage();
+        vibrateDevice();
     }
 }
 
 function enterFullscreen() {
     isFullscreen = true;
     fullscreenOverlay.classList.add('active');
+    document.documentElement.classList.add('fullscreen-active');
+    document.body.classList.add('fullscreen-active');
+    
+    // Request fullscreen API
+    const elem = fullscreenOverlay;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(err => console.log(err));
+    } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+    } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+    } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+    }
 }
 
 function exitFullscreen() {
     isFullscreen = false;
     fullscreenOverlay.classList.remove('active');
+    document.documentElement.classList.remove('fullscreen-active');
+    document.body.classList.remove('fullscreen-active');
+    
+    // Exit fullscreen API
+    if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => console.log(err));
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+    }
 }
 
 // Desktop: Double-click on clickable area
@@ -71,6 +106,26 @@ clickableArea.addEventListener('dblclick', (e) => {
 
 // Exit fullscreen on click (desktop) or tap (mobile)
 fullscreenOverlay.addEventListener('click', exitFullscreen);
+
+// Listen for fullscreen change events
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+function handleFullscreenChange() {
+    if (!document.fullscreenElement && 
+        !document.webkitFullscreenElement && 
+        !document.mozFullScreenElement && 
+        !document.msFullscreenElement) {
+        if (isFullscreen) {
+            isFullscreen = false;
+            fullscreenOverlay.classList.remove('active');
+            document.documentElement.classList.remove('fullscreen-active');
+            document.body.classList.remove('fullscreen-active');
+        }
+    }
+}
 
 // Arrow navigation
 prevArrow.addEventListener('click', (e) => {
@@ -99,6 +154,10 @@ document.addEventListener('keydown', (e) => {
 // Mobile touch handling
 let tapCount = 0;
 let tapTimer = null;
+let touchStartX = 0;
+let touchEndX = 0;
+let touchStartY = 0;
+let isSwiping = false;
 
 imageContainer.addEventListener('touchstart', (e) => {
     if (e.touches.length === 2) {
@@ -107,6 +166,10 @@ imageContainer.addEventListener('touchstart', (e) => {
             e.touches[0].pageY - e.touches[1].pageY
         );
     } else if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isSwiping = false;
+        
         tapCount++;
         if (tapCount === 1) {
             tapTimer = setTimeout(() => {
@@ -132,12 +195,40 @@ imageContainer.addEventListener('touchmove', (e) => {
         if (currentDistance > touchStartDistance + 50) {
             enterFullscreen();
         }
+    } else if (e.touches.length === 1) {
+        const touchCurrentX = e.touches[0].clientX;
+        const touchCurrentY = e.touches[0].clientY;
+        const deltaX = Math.abs(touchCurrentX - touchStartX);
+        const deltaY = Math.abs(touchCurrentY - touchStartY);
+        
+        // Detect horizontal swipe (more horizontal than vertical)
+        if (deltaX > deltaY && deltaX > 10) {
+            isSwiping = true;
+        }
     }
 }, { passive: false });
 
-// Prevent default touch behavior
 imageContainer.addEventListener('touchend', (e) => {
     if (e.touches.length === 0) {
+        if (isSwiping) {
+            touchEndX = e.changedTouches[0].clientX;
+            const swipeDistance = touchStartX - touchEndX;
+            
+            // Swipe left (next image)
+            if (swipeDistance > 50) {
+                nextSlide();
+            }
+            // Swipe right (previous image)
+            else if (swipeDistance < -50) {
+                prevSlide();
+            }
+            
+            // Reset double tap counter if user was swiping
+            clearTimeout(tapTimer);
+            tapCount = 0;
+            isSwiping = false;
+        }
+        
         touchStartDistance = 0;
     }
 });
