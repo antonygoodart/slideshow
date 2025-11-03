@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sticky Slide Tape</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slideshow</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="slideshow" id="slideshow">
-    <button class="arrow left" id="btnPrev" aria-label="Previous">‹</button>
-    <div class="viewport" id="viewport">
-      <div class="slides" id="slides">
-        <img src="https://picsum.photos/id/1018/1600/900" alt="slide 1" draggable="false">
-        <img src="https://picsum.photos/id/1025/1600/900" alt="slide 2" draggable="false">
-        <img src="https://picsum.photos/id/1039/1600/900" alt="slide 3" draggable="false">
-        <img src="https://picsum.photos/id/1047/1600/900" alt="slide 4" draggable="false">
-        <img src="https://picsum.photos/id/1052/1600/900" alt="slide 5" draggable="false">
-      </div>
+    <div class="container">
+        <div class="slideshow-wrapper">
+            <div class="image-container" id="imageContainer">
+                <img id="mainImage" src="" alt="Slide">
+                <div class="clickable-area" id="clickableArea"></div>
+            </div>
+            <div class="arrow arrow-left" id="prevArrow">‹</div>
+            <div class="arrow arrow-right" id="nextArrow">›</div>
+        </div>
     </div>
-    <button class="arrow right" id="btnNext" aria-label="Next">›</button>
-  </div>
 
-  <script src="script.js"></script>
+    <div class="fullscreen-overlay" id="fullscreenOverlay">
+        <img id="fullscreenImage" src="" alt="Fullscreen">
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
