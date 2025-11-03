@@ -1,95 +1,52 @@
-body {
+html, body {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: #111;
-  color: white;
-  font-family: sans-serif;
+  padding: 0;
+  height: 100%;
+  background: black;
   overflow: hidden;
+  touch-action: pan-y;
 }
 
 .slideshow {
   position: relative;
-  max-width: 90vw;
-  max-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.slideshow img {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.12s ease-out;
-}
-
-/* Arrows */
-button.arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: rgba(180, 180, 180, 0.4);
-  font-size: 3rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  user-select: none;
-}
-
-button.arrow:hover {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.left { left: 10px; }
-.right { right: 10px; }
-
-/* Large tap zones for easy navigation */
-.tap-zone {
-  position: absolute;
-  top: 25%;
-  height: 50%;
-  width: 20%;
-  cursor: pointer;
-  z-index: 2;
-}
-.tap-zone.left-zone { left: 0; }
-.tap-zone.right-zone { right: 0; }
-
-/* Fullscreen overlay */
-.fullscreen-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   background: black;
+}
+
+.slides-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  touch-action: pan-y;
 }
 
-.fullscreen-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.slides-container img {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-user-drag: none;
   transition: transform 0.3s ease;
+  cursor: pointer;
 }
 
-/* Rolling animation */
-.roll-left { animation: rollLeft 0.12s ease-out; }
-.roll-right { animation: rollRight 0.12s ease-out; }
-
-@keyframes rollLeft {
-  from { transform: translateX(-1.5%) rotate(-0.3deg); }
-  to { transform: translateX(0) rotate(0); }
+.fullscreen-active img {
+  cursor: zoom-out;
 }
 
-@keyframes rollRight {
-  from { transform: translateX(1.5%) rotate(0.3deg); }
-  to { transform: translateX(0) rotate(0); }
+.fullscreen-mode {
+  background: black;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.fullscreen-mode img {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
 }
