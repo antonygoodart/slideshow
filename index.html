@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Double-Tap Fullscreen Slideshow</title>
+  <title>Smooth Swipeable Slideshow</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <div class="slideshow">
-  <!-- Wide invisible tap zones -->
-  <div class="tap-zone left-zone" onclick="prevImage()"></div>
-  <div class="tap-zone right-zone" onclick="nextImage()"></div>
-
-  <!-- Visible arrows -->
-  <button class="arrow left" onclick="prevImage()">‹</button>
-  <img id="slide" src="" alt="Slideshow Image" />
-  <button class="arrow right" onclick="nextImage()">›</button>
+  <div class="slides-container" id="slidesContainer">
+    <img src="https://picsum.photos/id/1018/1600/900" alt="1">
+    <img src="https://picsum.photos/id/1025/1600/900" alt="2">
+    <img src="https://picsum.photos/id/1039/1600/900" alt="3">
+    <img src="https://picsum.photos/id/1047/1600/900" alt="4">
+    <img src="https://picsum.photos/id/1052/1600/900" alt="5">
+  </div>
 </div>
 
 <script src="script.js"></script>
