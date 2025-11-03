@@ -55,21 +55,63 @@ html, body {
     z-index: 10;
 }
 
-.arrow {
+/* This is the new, large, invisible clickable area */
+.arrow-container {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 45px;
-    height: 45px;
+    /* Make the clickable area wide and tall */
+    width: 20%; 
+    height: 80%;
     cursor: pointer;
     z-index: 20; /* Higher than clickable-area */
+    display: flex;
+    align-items: center; /* Vertically center the icon */
+    user-select: none;
+}
+
+/* This is the small, visible arrow icon */
+.arrow-icon {
+    width: 45px;
+    height: 45px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 28px;
     color: rgba(150, 150, 150, 0.5);
-    user-select: none;
     transition: color 0.2s;
+}
+
+/* Position the left container and its icon */
+.arrow-left {
+    left: 0;
+    justify-content: flex-start; /* Align icon to the left */
+}
+.arrow-left .arrow-icon {
+    margin-left: 10px; /* Keep original spacing */
+}
+
+/* Position the right container and its icon */
+.arrow-right {
+    right: 0;
+    justify-content: flex-end; /* Align icon to the right */
+}
+.arrow-right .arrow-icon {
+    margin-right: 10px; /* Keep original spacing */
+}
+
+/* When hovering the large CONTAINER, change the small ICON */
+.arrow-container:hover .arrow-icon {
+    color: rgba(100, 100, 100, 0.8);
+}
+
+/* When the CONTAINER is disabled, fade the ICON */
+.arrow-container.disabled {
+    cursor: default;
+    pointer-events: none;
+}
+.arrow-container.disabled .arrow-icon {
+    opacity: 0.2;
 }
 
 .arrow:hover {
@@ -128,3 +170,4 @@ html.fullscreen-active {
         display: none;
     }
 }
+
