@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smooth Swipeable Slideshow</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sticky Slide Tape</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<div class="slideshow">
-  <div class="slides-container" id="slidesContainer">
-    <img src="https://picsum.photos/id/1018/1600/900" alt="1">
-    <img src="https://picsum.photos/id/1025/1600/900" alt="2">
-    <img src="https://picsum.photos/id/1039/1600/900" alt="3">
-    <img src="https://picsum.photos/id/1047/1600/900" alt="4">
-    <img src="https://picsum.photos/id/1052/1600/900" alt="5">
+  <div class="slideshow" id="slideshow">
+    <button class="arrow left" id="btnPrev" aria-label="Previous">‹</button>
+    <div class="viewport" id="viewport">
+      <div class="slides" id="slides">
+        <img src="https://picsum.photos/id/1018/1600/900" alt="slide 1" draggable="false">
+        <img src="https://picsum.photos/id/1025/1600/900" alt="slide 2" draggable="false">
+        <img src="https://picsum.photos/id/1039/1600/900" alt="slide 3" draggable="false">
+        <img src="https://picsum.photos/id/1047/1600/900" alt="slide 4" draggable="false">
+        <img src="https://picsum.photos/id/1052/1600/900" alt="slide 5" draggable="false">
+      </div>
+    </div>
+    <button class="arrow right" id="btnNext" aria-label="Next">›</button>
   </div>
-</div>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
