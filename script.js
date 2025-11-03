@@ -1,10 +1,12 @@
 // Image URLs - Replace these with your links
 const images = [
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
-    'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800',
-    'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800',
-    'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800',
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800'
+    'https://i.imgur.com/9Ce48cb.jpeg',
+    'https://i.imgur.com/1ahttZA.jpeg',
+    'https://i.imgur.com/u6OQkfj.jpeg',
+    'https://i.imgur.com/nVtBeIT.jpeg',
+    'https://i.imgur.com/LaiENV8.jpeg',
+    'https://i.imgur.com/ITxrZSu.jpeg',
+    'https://i.imgur.com/IJRaK1W.jpeg'
 ];
 
 let currentIndex = 0;
@@ -214,3 +216,4 @@ imageContainer.addEventListener('touchend', (e) => {
 
 // Initialize
 updateImage();
+
