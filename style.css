@@ -1,52 +1,53 @@
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: black;
-  overflow: hidden;
-  touch-action: pan-y;
+/* Basic layout */
+:root { --arrow-color: rgba(180,180,180,0.45); --arrow-hover: rgba(255,255,255,0.85); }
+html,body { height:100%; margin:0; background:#000; }
+body { display:flex; align-items:center; justify-content:center; font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+
+/* Slideshow container fills available UI window (use your iframe or page viewport) */
+.slideshow { position:relative; width:100vw; height:100vh; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; }
+
+/* Viewport masks the slides strip */
+.viewport { width:100%; height:100%; overflow:hidden; touch-action: none; } /* capture horizontal pointer gestures */
+
+/* The tape: horizontal strip of slides */
+.slides { display:flex; height:100%; will-change: transform; user-select:none; -webkit-user-drag:none; }
+
+/* Each image fills the UI window area while keeping aspect ratio (cropping allowed) */
+.slides img {
+  width:100vw;
+  height:100vh;
+  flex-shrink:0;
+  object-fit:cover; /* fills area, preserves aspect */
+  pointer-events:auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 150ms ease; /* small hover/press transform if needed */
+  display:block;
 }
 
-.slideshow {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: black;
+/* Buttons - minimalist grey, thicker, no border, low opacity */
+button.arrow {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:0;
+  color:var(--arrow-color);
+  font-size:3.2rem;
+  line-height:1;
+  padding:10px 12px;
+  cursor:pointer;
+  z-index:10;
+  user-select:none;
+  -webkit-user-select:none;
 }
+button.arrow:hover { color:var(--arrow-hover); }
+button.arrow.left { left:12px; }
+button.arrow.right { right:12px; }
 
-.slides-container {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  touch-action: pan-y;
-}
+/* Disabled arrow look */
+button.arrow:disabled { opacity:0.25; cursor:default; color:rgba(180,180,180,0.25); }
 
-.slides-container img {
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  flex-shrink: 0;
-  user-select: none;
-  -webkit-user-drag: none;
-  transition: transform 0.3s ease;
-  cursor: pointer;
-}
-
-.fullscreen-active img {
-  cursor: zoom-out;
-}
-
-.fullscreen-mode {
-  background: black;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-}
-
-.fullscreen-mode img {
-  object-fit: contain;
-  width: 100%;
-  height: 100%;
-}
+/* Fullscreen mode classes */
+.fullscreen-active { cursor: zoom-out !important; }
+.fullscreen-mode { position:fixed; inset:0; z-index:9999; background:#000; }
