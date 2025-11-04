@@ -1,6 +1,5 @@
 // Image URLs - Replace these with your links
 const images = [
-    'https://i.imgur.com/9Ce48cb.jpeg',
     'https://i.imgur.com/1ahttZA.jpeg',
     'https://i.imgur.com/u6OQkfj.jpeg',
     'https://i.imgur.com/nVtBeIT.jpeg',
@@ -216,4 +215,5 @@ imageContainer.addEventListener('touchend', (e) => {
 
 // Initialize
 updateImage();
+
 
